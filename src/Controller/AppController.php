@@ -16,4 +16,10 @@ class AppController extends AbstractController
             'user' => $this->getUser(),
         ]);
     }
+
+    #[Route('/not-the-homepage', name: 'alternate_page')]
+    public function alternatePage()
+    {
+        return $this->render('app/alternate-page.html.twig',[]);
+    }
 }
