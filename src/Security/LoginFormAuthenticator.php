@@ -44,31 +44,60 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     protected function getLoginUrl()
     {
-        // TODO: Implement getLoginUrl() method.
+        return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 
     public function supports(Request $request)
     {
-        // TODO: Implement supports() method.
+        return self::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
     }
 
-    public function getCredentials(Request $request)
+    public function getCredentials(Request $request) #FIRST
     {
-        // TODO: Implement getCredentials() method.
+        $credentials = [
+            "email" => $request->get('email'),
+            "password" => $request->get('password'),
+            "csrf_token" => $request->get('_csrf_token'),
+        ];
+
+        $request->getSession()->set(Security::LAST_USERNAME, $credentials['email']);
+
+        return $credentials;
+    }
+    /**
+     * @param array $credentials
+     * @param UserProviderInterface $userProvider
+     * @return object|UserInterface|null
+     */
+    public function getUser($credentials, UserProviderInterface $userProvider) #SECOND
+    {
+        return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $credentials['email']]);
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    /**
+     * @param mixed $credentials
+     * @param UserInterface $user
+     * @return bool
+     */
+    public function checkCredentials($credentials, UserInterface $user) #THIRD
     {
-        // TODO: Implement getUser() method.
+        $token = new CsrfToken('authenticate', $credentials['csrf_token']);
+
+        if (!$this->csrfTokenManager->isTokenValid($token)) {
+            throw new InvalidCsrfTokenException();
+        }
+
+        return $this->passwordEncoder->isPasswordValid($user,$credentials['password']);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    /**
+     * @param Request $request
+     * @param TokenInterface $token
+     * @param string $providerKey
+     * @return Response|void|null
+     */
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey) #FOURTH
     {
-        // TODO: Implement checkCredentials() method.
-    }
-
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
-    {
-        // TODO: Implement onAuthenticationSuccess() method.
+        return new RedirectResponse($this->urlGenerator->generate('app_homepage'));
     }
 }
