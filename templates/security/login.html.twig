@@ -22,6 +22,9 @@
         <div class="mb-3">
             <label for="inputPassword" class="form-label">Password</label>
             <input type="password" name="password" class="form-control" id="inputPassword" >
+            <div class="mb-3">
+                 <a href="{{ path('app_forgot_password_request') }}">Forgot password?</a>
+            </div>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         </div>
         <div class="checkbox mb-3">
