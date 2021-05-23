@@ -102,6 +102,9 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             return new RedirectResponse($targetPath);
         }
 
+        if ($token->getUser()->isAdmin()) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        }
         return new RedirectResponse($this->urlGenerator->generate('app_homepage'));
     }
 }
